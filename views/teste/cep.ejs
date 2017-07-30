@@ -1,0 +1,61 @@
+<html>
+<head>
+	<title>Cep</title>
+	<link rel="stylesheet" href="css/bootstrap.css">
+</head>
+<body>
+	<form class="form-inline"  id="formulario_cep" action="/cep" method="POST">
+		<div class="form-group">
+		<label>CEP: <input type="text" id="cep" name="cep" maxlength="8"  onKeyPress="return isNumberKey(event)" class="form-control"/></label>
+		</div>
+		<input type="submit" class="btn btn-primary" value="Gravar"></input>
+	</form>
+</body>
+<script type="text/javascript">
+	function isNumberKey(evt)
+		{
+		 var charCode = (evt.which) ? evt.which : event.keyCode
+		 if (charCode > 31 && (charCode < 48 || charCode > 57))
+			return false;
+
+		 return true;
+	}
+	
+	function checkform_cep (e) {
+		var form = e.target;
+		var continuar = true;
+		var mensagem = "Ocorreram os seguintes erros:\n";
+		form.cep.style.backgroundColor='#FFFFFF';
+
+		if (form.cep.value == "") {
+			mensagem = mensagem + 'Por favor informe o CEP\n';
+			form.cep.style.backgroundColor='#FFFF99';
+			continuar = false;
+		} else {
+			if (form.cep.value.length < 8) {
+				mensagem = mensagem + 'O CEP informado não tem a quantidade de digitos correta\n';
+				form.cep.style.backgroundColor='#FFFF99';
+				continuar = false;
+			}
+		}
+		
+		
+		if (continuar) {
+			return true;
+		} else {
+			alert(mensagem);
+			e.preventDefault();
+			return false;
+		}
+
+
+	}
+	
+	
+	try {
+	  document.getElementById("formulario_cep").addEventListener("submit", checkform_cep, false);
+	} catch (error) {
+	  //Nada a fazer
+	}
+</script>
+</html>

@@ -1,0 +1,85 @@
+<html>
+<head>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="https://assets.pagar.me/js/pagarme.min.js"></script>
+<script type="text/javascript">
+//https://docs.pagar.me/capturing-card-data/#capturando-os-dados-em-uma-pagina-web
+	
+	function isNumberKey(evt)
+		{
+		 var charCode = (evt.which) ? evt.which : event.keyCode
+		 if (charCode > 31 && (charCode < 48 || charCode > 57))
+			return false;
+
+		 return true;
+	}
+	
+	function somenteTexto(campo) {
+	  campo.value = campo.value.replace(/[^a-zA-Zà-üÀ-Ü\s@]/g, '');
+	  campo.value = campo.value.replace('@', '');
+	}
+
+$(document).ready(function() { // quando o jQuery estiver carregado...
+    PagarMe.encryption_key = "ek_test_Ec8KhxISQ1tug1b8bCGxC2nXfxqRmk";
+
+
+    var form = $("#payment_form");
+
+    form.submit(function(event) { // quando o form for enviado...
+        // inicializa um objeto de cartão de crédito e completa
+        // com os dados do form
+		console.log('estou aqui');
+        var creditCard = new PagarMe.creditCard();
+        creditCard.cardHolderName = $("#payment_form #card_holder_name").val();
+        creditCard.cardExpirationMonth = $("#payment_form #card_expiration_month").val();
+        creditCard.cardExpirationYear = $("#payment_form #card_expiration_year").val();
+        creditCard.cardNumber = $("#payment_form #card_number").val();
+        creditCard.cardCVV = $("#payment_form #card_cvv").val();
+
+        // pega os erros de validação nos campos do form
+        var fieldErrors = creditCard.fieldErrors();
+
+        //Verifica se há erros
+        var hasErrors = false;
+        for(var field in fieldErrors) { hasErrors = true; break; }
+
+        if(hasErrors) {
+            // realiza o tratamento de errors
+            //alert(fieldErrors);
+			console.log('estou aqui 2');
+			console.log(fieldErrors);
+			$("#field_errors").html(JSON.stringify(fieldErrors));
+        } else {
+            // se não há erros, gera o card_hash...
+            creditCard.generateHash(function(cardHash) {
+                // ...coloca-o no form...
+                form.append($('<input type="hidden" name="card_hash">').val(cardHash));
+                // e envia o form
+                form.get(0).submit();
+            });
+        }
+
+        return false;
+    });
+});
+</script>
+</head>
+<body>
+	<form id="payment_form" action="/" method="POST">
+		Número do cartão: <input type="text" id="card_number" name="card_number" maxlength="20"  onKeyPress="return isNumberKey(event)"/>
+		<br/>
+		Nome (como escrito no cartão): <input type="text" id="card_holder_name" name="card_holder_name" maxlength="50" onkeypress="somenteTexto(this);" onkeyup="somenteTexto(this);" onKeyPress="return isNumberKey(event)"/>
+		<br/>
+		Mês de expiração: <input type="text" id="card_expiration_month" name="card_expiration_month" maxlength="2" onKeyPress="return isNumberKey(event)"/>
+		<br/>
+		Ano de expiração: <input type="text" id="card_expiration_year" name="card_expiration_year" maxlength="4" onKeyPress="return isNumberKey(event)"/>
+		<br/>
+		Código de segurança: <input type="text" id="card_cvv" name="card_cvv" maxlength="10" onKeyPress="return isNumberKey(event)"/>
+		<br/>
+		<div id="field_errors">
+		</div>
+		<br/>
+		<input type="submit"></input>
+	</form>
+</body>
+</html>

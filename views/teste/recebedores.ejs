@@ -1,0 +1,54 @@
+<html>
+<head>
+	<title>Recebedores</title>
+	<link rel="stylesheet" href="css/bootstrap.css">
+</head>
+<body>
+	<form class="form-inline" id="formulario_recebedor" action="/recebedores" method="POST">
+		  <label>Digite o Bank ID<input type="text" id="bank_account_id" name="bank_account_id" maxlength="30"  onKeyPress="return isNumberKey(event)"  class="form-control"/></label>
+		<br/>
+		<br/>
+		<input type="submit" class="btn btn-primary" value="Gravar"></input>
+	</form>
+
+</body>
+<script type="text/javascript">
+	function isNumberKey(evt)
+		{
+		 var charCode = (evt.which) ? evt.which : event.keyCode
+		 if (charCode > 31 && (charCode < 48 || charCode > 57))
+			return false;
+
+		 return true;
+	}
+	
+	function checkform_recebedor (e) {
+		var form = e.target;
+		var continuar = true;
+		var mensagem = "Ocorreram os seguintes erros:\n";
+		form.bank_account_id.style.backgroundColor='#FFFFFF';
+
+		if (form.bank_account_id.value == "") {
+			mensagem = mensagem + 'Por favor informe o bank ID\n';
+			form.bank_account_id.style.backgroundColor='#FFFF99';
+			continuar = false;
+		} 
+		if (continuar) {
+			return true;
+		} else {
+			alert(mensagem);
+			e.preventDefault();
+			return false;
+		}
+
+
+	}
+	
+	
+	try {
+	  document.getElementById("formulario_recebedor").addEventListener("submit", checkform_recebedor, false);
+	} catch (error) {
+	  //Nada a fazer
+	}
+</script>
+</html>
