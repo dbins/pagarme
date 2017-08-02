@@ -4,8 +4,8 @@
 	<link rel="stylesheet" href="css/bootstrap.css">
 </head>
 <body>
-	
-	<form id="formulario_banco" action="/" method="POST">
+	<div class="container">
+	<form id="formulario_banco" action="/banco" method="POST">
 		<div class="form-group">
 		<label>Agencia: <input type="text" id="agencia" name="agencia" maxlength="20"  onKeyPress="return isNumberKey(event)"  class="form-control"/></label>
 		</div>
@@ -16,7 +16,7 @@
 		<label>Nome do titular: <input type="text" id="legal_name" name="legal_name" maxlength="50" onkeypress="somenteTexto(this);" onkeyup="somenteTexto(this);" onKeyPress="return isNumberKey(event)"  class="form-control"/></label>
 		</div>
 		<div class="form-group">
-		<label>Numero da Conta<input type="text" id="conta" name="conta" maxlength="4" onKeyPress="return isNumberKey(event)" class="form-control"/></label>
+		<label>Numero da Conta<input type="text" id="conta" name="conta" maxlength="14" onKeyPress="return isNumberKey(event)" class="form-control"/></label>
 		</div>
 		<div class="form-group">
 		<label>Digito da Conta: <input type="text" id="conta_dv" name="conta_dv" maxlength="2" onKeyPress="return isNumberKey(event)"  class="form-control"/></label>
@@ -36,7 +36,7 @@
 		<input type="submit" class="btn btn-primary" value="Gravar"></input></label>
 		</div>
 	</form>
-	
+	</div>
 </body>
 <script type="text/javascript">
 	function is_cnpj(str) {

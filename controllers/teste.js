@@ -1,5 +1,5 @@
 const rp = require('request-promise'); 
-const API_KEY = "ak_test_grXijQ4GicOa2BLGZrDRTR5qNQxJW0";
+const API_KEY = "ak_test_00000000000000000000000000";
 module.exports = function (app){
 	app.get("/", function(req,res){
 		res.render("teste/index");
@@ -7,14 +7,15 @@ module.exports = function (app){
 	
 	app.post("/", function(req,res){
 		var dados_da_transacao = {
-			"amount": "1000", 
+			"amount": "100", 
 			"api_key": API_KEY, 
 			"card_hash": req.body.card_hash, 
 			"installments": 1, //Parcelas
 			"payment_method":"credit_card",
+			"capture": "true",
 			"customer": {
 				"address": {
-					"neighborhood": "Cidade Mon\u00e7\u00f5es", 
+					"neighborhood": "Cidade Moncoes", 
 					"street": "Rua Dr.Geraldo Campos Moreira", 
 					"street_number": "240", 
 					"zipcode": "04571020"
@@ -31,7 +32,7 @@ module.exports = function (app){
 				"id": "999",
 				"pedido": {
 					"product": {
-						"cost": "2500", 
+						"cost": "100", 
 						"name": "Swimming Cap"
 					}
 				}
@@ -80,24 +81,29 @@ module.exports = function (app){
 			//"card_last_digits": "2122",
 			//"card_first_digits": "455636",
 			//"card_brand": "visa",
+			//"status": "paid",
 			//"payment_method": "credit_card",
 			//"capture_method": "ecommerce",
 			
-			var status = response.status;
+			var resultados = response;
+			var status = resultados.status;
 			if (status =="paid"){
 				//Mostrar mensagem de sucesso
 			}
 			
 			
-			res.status(200).json({"resultado":"OK"});
+			res.status(200).json({"resultado":"OK", "dados": resultados});
 		}).catch(function (err) {
-			//console.log(err)
+			console.log(err.statusCode);
+			console.log(err.message); 
+			console.log(err.error);
+			//console.log(err.response);
 			var codigo_erro = err.statusCode;
-			var mensagem_erro = err.statusMessage;
+			var detalhes_erro = err.message;
 			var resposta = {
 				"resultado":"erro",
 				"codigo": codigo_erro,
-				"mensagem":mensagem_erro
+				"detalhes":detalhes_erro
 			}
 			res.status(500).json(resposta);	
 		});
@@ -116,7 +122,7 @@ module.exports = function (app){
 		  uri: 'https://api.pagar.me/1/zipcodes/' + cep
 		}
 		rp(opcoes).then((data) => {
-			res.status(200).json({"resultado":"OK", "Endereco": data});	
+			res.status(200).json({"resultado":"OK", "Endereco": JSON.parse(data)});	
 		}).catch((err) => {
 			console.log(err)
 			res.status(500).json({"resultado":"ERRO DE COMUNICACAO"});	
@@ -295,14 +301,19 @@ module.exports = function (app){
 		  json: true // JSON stringifies the body automatically
 		}
 		rp(opcoes).then((data) => {
-			res.status(200).json({"resultado":"OK", "ID_banco": data.id});	
+			var resultados = data;
+			res.status(200).json({"resultado":"OK", "ID_banco": resultados.id});	
 		}).catch((err) => {
+			console.log(err.statusCode);
+			console.log(err.message); 
+			console.log(err.error);
+			//console.log(err.response);
 			var codigo_erro = err.statusCode;
-			var mensagem_erro = err.statusMessage;
+			var detalhes_erro = err.message;
 			var resposta = {
 				"resultado":"erro",
 				"codigo": codigo_erro,
-				"mensagem":mensagem_erro
+				"detalhes":detalhes_erro
 			}
 			res.status(500).json(resposta);	
 		});
@@ -318,7 +329,7 @@ module.exports = function (app){
 		  
 		}
 		rp(opcoes).then((data) => {
-			res.status(200).json({"resultado":"OK", "Dados": data});	
+			res.status(200).json({"resultado":"OK", "Dados": JSON.parse(data)});	
 		}).catch((err) => {
 			//console.log(err)
 			var codigo_erro = err.statusCode;
@@ -353,14 +364,19 @@ module.exports = function (app){
 		  json: true // JSON stringifies the body automatically
 		}
 		rp(opcoes).then((data) => {
-			res.status(200).json({"resultado":"OK", "ID_recebedor": data.id});	
+			var resultados = data;
+			res.status(200).json({"resultado":"OK", "ID_recebedor": resultados.id});	
 		}).catch((err) => {
+			console.log(err.statusCode);
+			console.log(err.message); 
+			console.log(err.error);
+			//console.log(err.response);
 			var codigo_erro = err.statusCode;
-			var mensagem_erro = err.statusMessage;
+			var detalhes_erro = err.message;
 			var resposta = {
 				"resultado":"erro",
 				"codigo": codigo_erro,
-				"mensagem":mensagem_erro
+				"detalhes":detalhes_erro
 			}
 			res.status(500).json(resposta);	
 		});
@@ -400,7 +416,7 @@ module.exports = function (app){
 		  
 		}
 		rp(opcoes).then((data) => {
-			res.status(200).json({"resultado":"OK", "Dados": data});	
+			res.status(200).json({"resultado":"OK", "Dados": JSON.parse(data)});	
 		}).catch((err) => {
 			//console.log(err)
 			var codigo_erro = err.statusCode;
@@ -426,7 +442,7 @@ module.exports = function (app){
 		  
 		}
 		rp(opcoes).then((data) => {
-			res.status(200).json({"resultado":"OK", "Dados": data});	
+			res.status(200).json({"resultado":"OK", "Dados": JSON.parse(data)});	
 		}).catch((err) => {
 			//console.log(err)
 			var codigo_erro = err.statusCode;
@@ -469,7 +485,7 @@ module.exports = function (app){
 		  }
 		}  
 		rp(opcoes).then((data) => {
-			res.status(200).json({"resultado":"OK", "Dados": data});	
+			res.status(200).json({"resultado":"OK", "Dados": JSON.parse(data)});	
 		}).catch((err) => {
 			console.log(err)
 			var codigo_erro = err.statusCode;
@@ -522,7 +538,7 @@ module.exports = function (app){
 			//	"date_updated": "2015-03-24T21:26:09.000Z"
 			//}
 			
-			res.status(200).json({"resultado":"OK", "Dados": data});	
+			res.status(200).json({"resultado":"OK", "Dados": JSON.parse(data)});	
 		}).catch((err) => {
 			//console.log(err)
 			var codigo_erro = err.statusCode;
@@ -576,4 +592,68 @@ module.exports = function (app){
 			res.status(500).json(resposta);	
 		});
 	});
+	
+	app.get("/cartao", function(req,res){
+		res.render("teste/cartao");
+	});
+
+	app.post("/cartao", function(req,res){
+		
+		var card_expiration_date =  req.body.card_expiration_month + req.body.card_expiration_year;
+		var dados_cartao = {
+			"api_key": API_KEY,
+			"card_expiration_date": card_expiration_date, 
+			"card_number": req.body.card_number,
+			"card_cvv": req.body.card_cvv, 
+			"card_holder_name": req.body.card_holder_name
+		};
+		var opcoes = {  
+		  method: 'POST',
+		  uri: 'https://api.pagar.me/1/cards',
+		  body: dados_cartao,
+		  json: true // JSON stringifies the body automatically
+		}
+		rp(opcoes).then((data) => {
+			res.status(200).json({"resultado":"OK", "dados": data});	
+		}).catch((err) => {
+			console.log(err.statusCode);
+			console.log(err.message); 
+			console.log(err.error);
+			//console.log(err.response);
+			var codigo_erro = err.statusCode;
+			var detalhes_erro = err.message;
+			var resposta = {
+				"resultado":"erro",
+				"codigo": codigo_erro,
+				"detalhes":detalhes_erro
+			}
+			res.status(500).json(resposta);	
+		});
+	});	
+	
+	app.get("/listarcartoes", function(req,res){
+		var opcoes = {  
+		  method: 'GET',
+		  uri: 'https://api.pagar.me/1/cards',
+		  qs: {
+			api_key: API_KEY,
+			count: 10
+		  }
+		  
+		}
+		rp(opcoes).then((data) => {
+			res.status(200).json({"resultado":"OK", "Dados": JSON.parse(data)});	
+		}).catch((err) => {
+			//console.log(err)
+			var codigo_erro = err.statusCode;
+			var mensagem_erro = err.statusMessage;
+			var resposta = {
+				"resultado":"erro",
+				"codigo": codigo_erro,
+				"mensagem":mensagem_erro
+			}
+			res.status(500).json(resposta);	
+		});
+	});
+	
 }

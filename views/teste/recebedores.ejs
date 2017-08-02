@@ -4,13 +4,14 @@
 	<link rel="stylesheet" href="css/bootstrap.css">
 </head>
 <body>
+	<div class="container">
 	<form class="form-inline" id="formulario_recebedor" action="/recebedores" method="POST">
 		  <label>Digite o Bank ID<input type="text" id="bank_account_id" name="bank_account_id" maxlength="30"  onKeyPress="return isNumberKey(event)"  class="form-control"/></label>
 		<br/>
 		<br/>
 		<input type="submit" class="btn btn-primary" value="Gravar"></input>
 	</form>
-
+	</div>
 </body>
 <script type="text/javascript">
 	function isNumberKey(evt)

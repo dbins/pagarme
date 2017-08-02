@@ -4,12 +4,14 @@
 	<link rel="stylesheet" href="css/bootstrap.css">
 </head>
 <body>
+	<div class="container">
 	<form class="form-inline"  id="formulario_cep" action="/cep" method="POST">
 		<div class="form-group">
 		<label>CEP: <input type="text" id="cep" name="cep" maxlength="8"  onKeyPress="return isNumberKey(event)" class="form-control"/></label>
 		</div>
 		<input type="submit" class="btn btn-primary" value="Gravar"></input>
 	</form>
+	</div>
 </body>
 <script type="text/javascript">
 	function isNumberKey(evt)
