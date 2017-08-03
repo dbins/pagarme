@@ -1,5 +1,9 @@
 const rp = require('request-promise'); 
 const API_KEY = "ak_test_00000000000000000000000000";
+//Documentacao
+//https://docs.pagar.me/v2013-03-01/reference#principios-basicos
+
+
 module.exports = function (app){
 	app.get("/", function(req,res){
 		res.render("teste/index");
@@ -392,7 +396,7 @@ module.exports = function (app){
 		  
 		}
 		rp(opcoes).then((data) => {
-			res.status(200).json({"resultado":"OK", "Dados": data});	
+			res.status(200).json({"resultado":"OK", "Dados": JSON.parse(data)});	
 		}).catch((err) => {
 			//console.log(err)
 			var codigo_erro = err.statusCode;
@@ -456,6 +460,7 @@ module.exports = function (app){
 		});
 	});
 	
+	//Pesquisa com ElasticSearch
 	app.get("/pesquisa", function(req,res){
 		var dados_pesquisa = {
 			"query":{"filtered": {"query": {"match_all": {}},
@@ -464,8 +469,8 @@ module.exports = function (app){
 				  {
 					"range": {
 					  "date_created": {
-						"lte": "2017-07-30",
-						"gte": "2017-09-01"
+						"lte": "2017-09-30",
+						"gte": "2017-07-30"
 					  }
 					}
 				  }
@@ -487,13 +492,12 @@ module.exports = function (app){
 		rp(opcoes).then((data) => {
 			res.status(200).json({"resultado":"OK", "Dados": JSON.parse(data)});	
 		}).catch((err) => {
-			console.log(err)
 			var codigo_erro = err.statusCode;
-			var mensagem_erro = err.statusMessage;
+			var detalhes_erro = err.message;
 			var resposta = {
 				"resultado":"erro",
 				"codigo": codigo_erro,
-				"mensagem":mensagem_erro
+				"detalhes":detalhes_erro
 			}
 			res.status(500).json(resposta);	
 		});
@@ -540,13 +544,12 @@ module.exports = function (app){
 			
 			res.status(200).json({"resultado":"OK", "Dados": JSON.parse(data)});	
 		}).catch((err) => {
-			//console.log(err)
 			var codigo_erro = err.statusCode;
-			var mensagem_erro = err.statusMessage;
+			var detalhes_erro = err.message;
 			var resposta = {
 				"resultado":"erro",
 				"codigo": codigo_erro,
-				"mensagem":mensagem_erro
+				"detalhes":detalhes_erro
 			}
 			res.status(500).json(resposta);	
 		});
@@ -583,11 +586,11 @@ module.exports = function (app){
 			res.status(200).json({"resultado":"OK"});	
 		}).catch((err) => {
 			var codigo_erro = err.statusCode;
-			var mensagem_erro = err.statusMessage;
+			var detalhes_erro = err.message;
 			var resposta = {
 				"resultado":"erro",
 				"codigo": codigo_erro,
-				"mensagem":mensagem_erro
+				"detalhes":detalhes_erro
 			}
 			res.status(500).json(resposta);	
 		});
@@ -644,13 +647,133 @@ module.exports = function (app){
 		rp(opcoes).then((data) => {
 			res.status(200).json({"resultado":"OK", "Dados": JSON.parse(data)});	
 		}).catch((err) => {
-			//console.log(err)
 			var codigo_erro = err.statusCode;
-			var mensagem_erro = err.statusMessage;
+			var detalhes_erro = err.message;
 			var resposta = {
 				"resultado":"erro",
 				"codigo": codigo_erro,
-				"mensagem":mensagem_erro
+				"detalhes":detalhes_erro
+			}
+			res.status(500).json(resposta);	
+		});
+	});
+	
+	
+	app.get("/vertransacao", function(req,res){
+		var id_transacao = 1781762;
+		var opcoes = {  
+		  method: 'GET',
+		  uri: 'https://api.pagar.me/1/transactions/' + id_transacao,
+		  qs: {
+			api_key: API_KEY
+		  }
+		  
+		}
+		rp(opcoes).then((data) => {
+			res.status(200).json({"resultado":"OK", "Dados": JSON.parse(data)});	
+		}).catch((err) => {
+			var codigo_erro = err.statusCode;
+			var detalhes_erro = err.message;
+			var resposta = {
+				"resultado":"erro",
+				"codigo": codigo_erro,
+				"detalhes":detalhes_erro
+			}
+			res.status(500).json(resposta);	
+		});
+	});
+	
+	
+	app.get("/vercartao", function(req,res){
+		var id_cartao = "card_cj5u6wzz600kb9t6e33yqlifc";
+		var opcoes = {  
+		  method: 'GET',
+		  uri: 'https://api.pagar.me/1/cards/' + id_cartao,
+		  qs: {
+			api_key: API_KEY
+		  }
+		  
+		}
+		rp(opcoes).then((data) => {
+			res.status(200).json({"resultado":"OK", "Dados": JSON.parse(data)});	
+		}).catch((err) => {
+			var codigo_erro = err.statusCode;
+			var detalhes_erro = err.message;
+			var resposta = {
+				"resultado":"erro",
+				"codigo": codigo_erro,
+				"detalhes":detalhes_erro
+			}
+			res.status(500).json(resposta);	
+		});
+	});
+	
+	app.get("/historicosaldo", function(req,res){
+		var opcoes = {  
+		  method: 'GET',
+		  uri: 'https://api.pagar.me/1/balance/operations',
+		  qs: {
+			api_key: API_KEY
+		  }
+		  
+		}
+		rp(opcoes).then((data) => {
+			res.status(200).json({"resultado":"OK", "Dados": JSON.parse(data)});	
+		}).catch((err) => {
+			var codigo_erro = err.statusCode;
+			var detalhes_erro = err.message;
+			var resposta = {
+				"resultado":"erro",
+				"codigo": codigo_erro,
+				"detalhes":detalhes_erro
+			}
+			res.status(500).json(resposta);	
+		});
+	});
+	
+	app.get("/verbanco", function(req,res){
+		var id_banco = 17536182;
+		var opcoes = {  
+		  method: 'GET',
+		  uri: 'https://api.pagar.me/1/bank_accounts/' + id_banco,
+		  qs: {
+			api_key: API_KEY
+		  }
+		  
+		}
+		rp(opcoes).then((data) => {
+			res.status(200).json({"resultado":"OK", "Dados": JSON.parse(data)});	
+		}).catch((err) => {
+			var codigo_erro = err.statusCode;
+			var detalhes_erro = err.message;
+			var resposta = {
+				"resultado":"erro",
+				"codigo": codigo_erro,
+				"detalhes":detalhes_erro
+			}
+			res.status(500).json(resposta);	
+		});
+	});
+	
+	app.get("/verrecebedor", function(req,res){
+		var id_recebedor = "re_cj5ue9q9h0097hg6d3665zssk";
+		var opcoes = {  
+		  method: 'GET',
+		  uri: 'https://api.pagar.me/1/recipients/' + id_recebedor,
+		  qs: {
+			api_key: API_KEY
+		  }
+		  
+		}
+		rp(opcoes).then((data) => {
+			res.status(200).json({"resultado":"OK", "Dados": JSON.parse(data)});	
+		}).catch((err) => {
+			var codigo_erro = err.statusCode;
+			var detalhes_erro = err.message;
+			var resposta = {
+				"resultado":"erro",
+				"codigo": codigo_erro,
+				"detalhes":detalhes_erro
 			}
 			res.status(500).json(resposta);	
 		});
