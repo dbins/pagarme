@@ -39,33 +39,51 @@
 	</div>
 </body>
 <script type="text/javascript">
-	function is_cnpj(str) {
-		if (!(str = /^\d?(\d{2})\.?(\d{3})\.?(\d{3})\/?(\d{4})\-?(\d{2})/.exec(str)))
-			return false;
+	function echeck(str) {
 
-		var sum1 = 0, sum2 = 0, sum3 = 0, calc1 = 5, calc2 = 6;
-
-		str.shift();
-		str = str.join("");
-
-		for (var i=0; i <= 12; i++) {
-			calc1 = (calc1 < 2) ? 9 : calc1;
-			calc2 = (calc2 < 2) ? 9 : calc2;
-
-			if (i <= 11)
-				sum1 += str[i] * calc1;
-
-			sum2 += str[i] * calc2;
-			sum3 += str[i];
-			calc1--;
-			calc2--;
+		var at="@"
+		var dot="."
+		var lat=str.indexOf(at)
+		var lstr=str.length
+		var ldot=str.indexOf(dot)
+		if (str.indexOf(at)==-1){
+		   //alert("Invalid E-mail ID")
+		   return false
 		}
 
-		sum1 %= 11;
-		sum2 %= 11;
+		if (str.indexOf(at)==-1 || str.indexOf(at)==0 || str.indexOf(at)==lstr){
+		   //alert("Invalid E-mail ID")
+		   return false
+		}
 
-		return (sum3 && str[12] == (sum1 < 2 ? 0 : 11 - sum1) && str[13] == (sum2 < 2 ? 0 : 11 - sum2)) ? str : false;
+		if (str.indexOf(dot)==-1 || str.indexOf(dot)==0 || str.indexOf(dot)==lstr){
+			//alert("Invalid E-mail ID")
+			return false
+		}
+
+		 if (str.indexOf(at,(lat+1))!=-1){
+			//alert("Invalid E-mail ID")
+			return false
+		 }
+
+		 if (str.substring(lat-1,lat)==dot || str.substring(lat+1,lat+2)==dot){
+			//alert("Invalid E-mail ID")
+			return false
+		 }
+
+		 if (str.indexOf(dot,(lat+2))==-1){
+			//alert("Invalid E-mail ID")
+			return false
+		 }
+		
+		 if (str.indexOf(" ")!=-1){
+			//alert("Invalid E-mail ID")
+			return false
+		 }
+
+		 return true					
 	}
+			
 	
 	function checaCPF (CPF) {
 		if (CPF.length != 11 || CPF == "00000000000" || CPF == "11111111111" ||
