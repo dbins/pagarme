@@ -1,8 +1,8 @@
 const rp = require('request-promise'); 
-const API_KEY = "ak_test_0000000000000000000000";
+const API_KEY = "ak_test_0000000000000000";
 //Documentacao
 //https://docs.pagar.me/v2013-03-01/reference#principios-basicos
-
+//https://docs.pagar.me/v2013-03-01/reference#gerando-card_hash-manualmente
 
 module.exports = function (app){
 	app.get("/", function(req,res){
@@ -11,7 +11,7 @@ module.exports = function (app){
 	
 	app.post("/", function(req,res){
 		var dados_da_transacao = {
-			"amount": "100", 
+			"amount": "150", 
 			"api_key": API_KEY, 
 			"card_hash": req.body.card_hash, 
 			"installments": 1, //Parcelas
@@ -24,7 +24,7 @@ module.exports = function (app){
 					"street_number": "240", 
 					"zipcode": "04571020"
 				}, 
-				"document_number": "92545278157", 
+				"document_number": "12757841190", 
 				"email": "jappleseed@apple.com", 
 				"name": "John Appleseed", 
 				"phone": {
@@ -33,13 +33,15 @@ module.exports = function (app){
 				}
 			},
 			"metadata": {
-				"id": "999",
+				"id": "99",
 				"pedido": {
 					"product": {
-						"cost": "100", 
-						"name": "Swimming Cap"
+						"cost": "300", 
+						"name": "Bola Quadrada",
+						"code": "71"
 					}
-				}
+				},
+				"produto":"Bola Quadrada 2"
 			},
 			"postback_url": "http://requestb.in/pkt7pgpk"
 			
@@ -624,35 +626,60 @@ module.exports = function (app){
 	//Pesquisa com ElasticSearch
 	app.get("/pesquisa", function(req,res){
 		var dados_pesquisa = {
+			
+			//Para retornar apenas alguns campos
+			//Objeto transaction
+			"_source": ["date_created", "card_holder_name", "id", "nsu", "amount", "customer", "metadata"],
+			
 			"query":{"filtered": {"query": {"match_all": {}},
 			  "filter": {
 				  
-				"and": [
-				  {
-					"range": {
-					  "date_created": {
-						"lte": "2017-09-30",
-						"gte": "2017-07-30"
-					  }
-					}
-				 },
-				]  
-				  
-				//Nao funcionou....
-				// "nested": {
-				//	"path": "customer", 
-				//	"query": {
-				//	  	"match": {
-				//			  "customer.id": "225732"
-				//			}
-				//		  }
+				//filtro por intervalo de tempo
+				//Neste exemplo, dentro do array AND pode inserir mais condicoes
+				//"and": [
+				//  {
+				//	"range": {
+				//	  "date_created": {
+				//		"lte": "2017-09-30",
+				//		"gte": "2017-08-02"
 				//	  }
+				//	}
+				// },
+				//]
 				
+				//Filtro por valor (maior que 2 reais)
+				//"range": {
+				//    "amount": {
+				//		"gte": "200"
+				//	}
+				//}
+				
+				//Exemplos de filtros individuais
+				
+				//"term": { "nsu": 1781764 }
+				//"term": { "customer.document_number": 12757841190 }
+				
+				//Nao funcionou
+				//"term": {"metadata.pedido.product.name": "Bola Quadrada"}
+				//"term": {"metadata.produto": "Bola Quadrada 2"}
+				//"term": {"metadata.produto.original": "Bola Quadrada 2"}
+				
+				//Funcionou
+				//"term": {"metadata.id": "99"}
+				//"term": {"metadata.pedido.product.code": "71"}
+				//"term": {"metadata.pedido.product.name": "Bola"}
 				
 				
 			  }
 			}
 		  }
+		  
+		  //Para ordenar os resultados
+		  ,"sort": [
+				{"id":   { "order": "desc" }},
+				{"_score": { "order": "desc" }}
+			]
+		  
 		};
 		
 		var opcoes = {  
@@ -844,7 +871,7 @@ module.exports = function (app){
 	
 	
 	app.get("/vertransacao", function(req,res){
-		var id_transacao = 1781762;
+		var id_transacao = 1795027;
 		var opcoes = {  
 		  method: 'GET',
 		  uri: 'https://api.pagar.me/1/transactions/' + id_transacao,
@@ -1011,4 +1038,63 @@ module.exports = function (app){
 		});
 	});
 	
+	app.get("/pdf", function(req,response){
+		var fs = require('fs');
+		var pdf = require('html-pdf');
+		var html = fs.readFileSync('public/views/teste.html', 'utf8');
+		var options = { format: 'Letter' };
+		
+		//Para gravar em disco e depois fazer download
+		pdf.create(html, options).toFile('public/views/banco.pdf', function(err, res) {
+		   if (err) return console.log(err);
+		   console.log(res); // { filename: 'views/banco.pdf' } 
+		   var stream = fs.createReadStream('public/views/banco.pdf');
+		   var filename = "banco.pdf"; 
+  		   response.setHeader('Content-disposition', 'inline; filename="' + filename + '"');
+		   response.setHeader('Content-type', 'application/pdf');
+		   stream.pipe(response);
+		});
+		
+		
+		
+	});
+	
+	app.get("/hash", function(req,res){
+		res.render("teste/hash");
+	});
+	
+	app.post("/hash", function(req,res){
+		var opcoes = {  
+		  method: 'GET',
+		  uri: 'https://api.pagar.me/1/transactions/card_hash_key',
+		  qs: {
+			encryption_key: "ek_test_E8SxpgBoEr1GBBWiXXcVHP4mIiShsw"
+		  }
+		  
+		}
+		rp(opcoes).then((data) => {
+			var qs = require('querystring');
+			var crypto = require("crypto");
+			var resultados = JSON.parse(data);	
+			var date_created = resultados.date_created;
+			var id = resultados.id;
+			var ip = resultados.ip;
+			var public_key = resultados.public_key;
+			var querystring = 'card_number=' + qs.escape(req.body.card_number) + '&card_holder_name=' + qs.escape(req.body.card_holder_name) + '&card_expiration_date=' + qs.escape(req.body.card_expiration_month) + qs.escape(req.body.card_expiration_year) + '&card_cvv=' + qs.escape(req.body.card_cvv);
+			var query_buffer = new Buffer(querystring, "binary")
+			var encrypted = crypto.publicEncrypt({"key":public_key, padding:crypto.RSA_PKCS1_PADDING}, query_buffer).toString("base64");
+			var cardhash = id + "_" + encrypted;
+			res.status(200).json({"resultado":"OK", "CardHash": cardhash});	
+
+		}).catch((err) => {
+			var codigo_erro = err.statusCode;
+			var detalhes_erro = err.message;
+			var resposta = {
+				"resultado":"erro",
+				"codigo": codigo_erro,
+				"detalhes":detalhes_erro
+			}
+			res.status(500).json(resposta);	
+		});
+	});
 }
