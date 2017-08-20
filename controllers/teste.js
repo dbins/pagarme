@@ -1,8 +1,144 @@
 const rp = require('request-promise'); 
-const API_KEY = "ak_test_0000000000000000";
+const API_KEY = "ak_test_000000000000000000000000000000";
 //Documentacao
 //https://docs.pagar.me/v2013-03-01/reference#principios-basicos
 //https://docs.pagar.me/v2013-03-01/reference#gerando-card_hash-manualmente
+
+function pad (str, max) {
+  str = str.toString();
+  return str.length < max ? pad("0" + str, max) : str;
+}
+
+var bancos = [
+	{'code': '001', 'name': 'Banco do Brasil'},
+	{'code': '003', 'name': 'Banco da Amazônia'},
+	{'code': '004', 'name': 'Banco do Nordeste'},
+	{'code': '021', 'name': 'Banestes'},
+	{'code': '025', 'name': 'Banco Alfa'},
+	{'code': '027', 'name': 'Besc'},
+	{'code': '029', 'name': 'Banerj'},
+	{'code': '031', 'name': 'Banco Beg'},
+	{'code': '033', 'name': 'Banco Santander Banespa'},
+	{'code': '036', 'name': 'Banco Bem'},
+	{'code': '037', 'name': 'Banpará'},
+	{'code': '038', 'name': 'Banestado'},
+	{'code': '039', 'name': 'BEP'},
+	{'code': '040', 'name': 'Banco Cargill'},
+	{'code': '041', 'name': 'Banrisul'},
+	{'code': '044', 'name': 'BVA'},
+	{'code': '045', 'name': 'Banco Opportunity'},
+	{'code': '047', 'name': 'Banese'},
+	{'code': '062', 'name': 'Hipercard'},
+	{'code': '063', 'name': 'Ibibank'},
+	{'code': '065', 'name': 'Lemon Bank'},
+	{'code': '066', 'name': 'Banco Morgan Stanley Dean Witter'},
+	{'code': '069', 'name': 'BPN Brasil'},
+	{'code': '070', 'name': 'Banco de Brasília – BRB'},
+	{'code': '072', 'name': 'Banco Rural'},
+	{'code': '073', 'name': 'Banco Popular'},
+	{'code': '074', 'name': 'Banco J. Safra'},
+	{'code': '075', 'name': 'Banco CR2'},
+	{'code': '076', 'name': 'Banco KDB'},
+	{'code': '096', 'name': 'Banco BMF'},
+	{'code': '104', 'name': 'Caixa Econômica Federal'},
+	{'code': '107', 'name': 'Banco BBM'},
+	{'code': '116', 'name': 'Banco Único'},
+	{'code': '151', 'name': 'Nossa Caixa'},
+	{'code': '175', 'name': 'Banco Finasa'},
+	{'code': '184', 'name': 'Banco Itaú BBA'},
+	{'code': '204', 'name': 'American Express Bank'},
+	{'code': '208', 'name': 'Banco Pactual'},
+	{'code': '212', 'name': 'Banco Matone'},
+	{'code': '213', 'name': 'Banco Arbi'},
+	{'code': '214', 'name': 'Banco Dibens'},
+	{'code': '217', 'name': 'Banco Joh Deere'},
+	{'code': '218', 'name': 'Banco Bonsucesso'},
+	{'code': '222', 'name': 'Banco Calyon Brasil'},
+	{'code': '224', 'name': 'Banco Fibra'},
+	{'code': '225', 'name': 'Banco Brascan'},
+	{'code': '229', 'name': 'Banco Cruzeiro'},
+	{'code': '230', 'name': 'Unicard'},
+	{'code': '233', 'name': 'Banco GE Capital'},
+	{'code': '237', 'name': 'Bradesco'},
+	{'code': '241', 'name': 'Banco Clássico'},
+	{'code': '243', 'name': 'Banco Stock Máxima'},
+	{'code': '246', 'name': 'Banco ABC Brasil'},
+	{'code': '248', 'name': 'Banco Boavista Interatlântico'},
+	{'code': '249', 'name': 'Investcred Unibanco'},
+	{'code': '250', 'name': 'Banco Schahin'},
+	{'code': '252', 'name': 'Fininvest'},
+	{'code': '254', 'name': 'Paraná Banco'},
+	{'code': '263', 'name': 'Banco Cacique'},
+	{'code': '265', 'name': 'Banco Fator'},
+	{'code': '266', 'name': 'Banco Cédula'},
+	{'code': '300', 'name': 'Banco de la Nación Argentina'},
+	{'code': '318', 'name': 'Banco BMG'},
+	{'code': '320', 'name': 'Banco Industrial e Comercial'},
+	{'code': '356', 'name': 'ABN Amro Real'},
+	{'code': '341', 'name': 'Itau'},
+	{'code': '347', 'name': 'Sudameris'},
+	{'code': '351', 'name': 'Banco Santander'},
+	{'code': '353', 'name': 'Banco Santander Brasil'},
+	{'code': '366', 'name': 'Banco Societe Generale Brasil'},
+	{'code': '370', 'name': 'Banco WestLB'},
+	{'code': '376', 'name': 'JP Morgan'},
+	{'code': '389', 'name': 'Banco Mercantil do Brasil'},
+	{'code': '394', 'name': 'Banco Mercantil de Crédito'},
+	{'code': '399', 'name': 'HSBC'},
+	{'code': '409', 'name': 'Unibanco'},
+	{'code': '412', 'name': 'Banco Capital'},
+	{'code': '422', 'name': 'Banco Safra'},
+	{'code': '453', 'name': 'Banco Rural'},
+	{'code': '456', 'name': 'Banco Tokyo Mitsubishi UFJ'},
+	{'code': '464', 'name': 'Banco Sumitomo Mitsui Brasileiro'},
+	{'code': '477', 'name': 'Citibank'},
+	{'code': '479', 'name': 'Itaubank (antigo Bank Boston)'},
+	{'code': '487', 'name': 'Deutsche Bank'},
+	{'code': '488', 'name': 'Banco Morgan Guaranty'},
+	{'code': '492', 'name': 'Banco NMB Postbank'},
+	{'code': '494', 'name': 'Banco la República Oriental del Uruguay'},
+	{'code': '495', 'name': 'Banco La Provincia de Buenos Aires'},
+	{'code': '505', 'name': 'Banco Credit Suisse'},
+	{'code': '600', 'name': 'Banco Luso Brasileiro'},
+	{'code': '604', 'name': 'Banco Industrial'},
+	{'code': '610', 'name': 'Banco VR'},
+	{'code': '611', 'name': 'Banco Paulista'},
+	{'code': '612', 'name': 'Banco Guanabara'},
+	{'code': '613', 'name': 'Banco Pecunia'},
+	{'code': '623', 'name': 'Banco Panamericano'},
+	{'code': '626', 'name': 'Banco Ficsa'},
+	{'code': '630', 'name': 'Banco Intercap'},
+	{'code': '633', 'name': 'Banco Rendimento'},
+	{'code': '634', 'name': 'Banco Triângulo'},
+	{'code': '637', 'name': 'Banco Sofisa'},
+	{'code': '638', 'name': 'Banco Prosper'},
+	{'code': '643', 'name': 'Banco Pine'},
+	{'code': '652', 'name': 'Itaú Holding Financeira'},
+	{'code': '653', 'name': 'Banco Indusval'},
+	{'code': '654', 'name': 'Banco A.J. Renner'},
+	{'code': '655', 'name': 'Banco Votorantim'},
+	{'code': '707', 'name': 'Banco Daycoval'},
+	{'code': '719', 'name': 'Banif'},
+	{'code': '721', 'name': 'Banco Credibel'},
+	{'code': '734', 'name': 'Banco Gerdau'},
+	{'code': '735', 'name': 'Banco Pottencial'},
+	{'code': '738', 'name': 'Banco Morada'},
+	{'code': '739', 'name': 'Banco Galvão de Negócios'},
+	{'code': '740', 'name': 'Banco Barclays'},
+	{'code': '741', 'name': 'BRP'},
+	{'code': '743', 'name': 'Banco Semear'},
+	{'code': '745', 'name': 'Banco Citibank'},
+	{'code': '746', 'name': 'Banco Modal'},
+	{'code': '747', 'name': 'Banco Rabobank International'},
+	{'code': '748', 'name': 'Banco Cooperativo Sicredi'},
+	{'code': '749', 'name': 'Banco Simples'},
+	{'code': '751', 'name': 'Dresdner Bank'},
+	{'code': '752', 'name': 'BNP Paribas'},
+	{'code': '753', 'name': 'Banco Comercial Uruguai'},
+	{'code': '755', 'name': 'Banco Merrill Lynch'},
+	{'code': '756', 'name': 'Banco Cooperativo do Brasil'},
+	{'code': '757', 'name': 'KEB'}
+];
 
 module.exports = function (app){
 	app.get("/", function(req,res){
@@ -155,136 +291,7 @@ module.exports = function (app){
 	});
 	
 	app.get("/banco", function(req,res){
-		var bancos = [
-			{'code': '001', 'name': 'Banco do Brasil'},
-			{'code': '003', 'name': 'Banco da Amazônia'},
-			{'code': '004', 'name': 'Banco do Nordeste'},
-			{'code': '021', 'name': 'Banestes'},
-			{'code': '025', 'name': 'Banco Alfa'},
-			{'code': '027', 'name': 'Besc'},
-			{'code': '029', 'name': 'Banerj'},
-			{'code': '031', 'name': 'Banco Beg'},
-			{'code': '033', 'name': 'Banco Santander Banespa'},
-			{'code': '036', 'name': 'Banco Bem'},
-			{'code': '037', 'name': 'Banpará'},
-			{'code': '038', 'name': 'Banestado'},
-			{'code': '039', 'name': 'BEP'},
-			{'code': '040', 'name': 'Banco Cargill'},
-			{'code': '041', 'name': 'Banrisul'},
-			{'code': '044', 'name': 'BVA'},
-			{'code': '045', 'name': 'Banco Opportunity'},
-			{'code': '047', 'name': 'Banese'},
-			{'code': '062', 'name': 'Hipercard'},
-			{'code': '063', 'name': 'Ibibank'},
-			{'code': '065', 'name': 'Lemon Bank'},
-			{'code': '066', 'name': 'Banco Morgan Stanley Dean Witter'},
-			{'code': '069', 'name': 'BPN Brasil'},
-			{'code': '070', 'name': 'Banco de Brasília – BRB'},
-			{'code': '072', 'name': 'Banco Rural'},
-			{'code': '073', 'name': 'Banco Popular'},
-			{'code': '074', 'name': 'Banco J. Safra'},
-			{'code': '075', 'name': 'Banco CR2'},
-			{'code': '076', 'name': 'Banco KDB'},
-			{'code': '096', 'name': 'Banco BMF'},
-			{'code': '104', 'name': 'Caixa Econômica Federal'},
-			{'code': '107', 'name': 'Banco BBM'},
-			{'code': '116', 'name': 'Banco Único'},
-			{'code': '151', 'name': 'Nossa Caixa'},
-			{'code': '175', 'name': 'Banco Finasa'},
-			{'code': '184', 'name': 'Banco Itaú BBA'},
-			{'code': '204', 'name': 'American Express Bank'},
-			{'code': '208', 'name': 'Banco Pactual'},
-			{'code': '212', 'name': 'Banco Matone'},
-			{'code': '213', 'name': 'Banco Arbi'},
-			{'code': '214', 'name': 'Banco Dibens'},
-			{'code': '217', 'name': 'Banco Joh Deere'},
-			{'code': '218', 'name': 'Banco Bonsucesso'},
-			{'code': '222', 'name': 'Banco Calyon Brasil'},
-			{'code': '224', 'name': 'Banco Fibra'},
-			{'code': '225', 'name': 'Banco Brascan'},
-			{'code': '229', 'name': 'Banco Cruzeiro'},
-			{'code': '230', 'name': 'Unicard'},
-			{'code': '233', 'name': 'Banco GE Capital'},
-			{'code': '237', 'name': 'Bradesco'},
-			{'code': '241', 'name': 'Banco Clássico'},
-			{'code': '243', 'name': 'Banco Stock Máxima'},
-			{'code': '246', 'name': 'Banco ABC Brasil'},
-			{'code': '248', 'name': 'Banco Boavista Interatlântico'},
-			{'code': '249', 'name': 'Investcred Unibanco'},
-			{'code': '250', 'name': 'Banco Schahin'},
-			{'code': '252', 'name': 'Fininvest'},
-			{'code': '254', 'name': 'Paraná Banco'},
-			{'code': '263', 'name': 'Banco Cacique'},
-			{'code': '265', 'name': 'Banco Fator'},
-			{'code': '266', 'name': 'Banco Cédula'},
-			{'code': '300', 'name': 'Banco de la Nación Argentina'},
-			{'code': '318', 'name': 'Banco BMG'},
-			{'code': '320', 'name': 'Banco Industrial e Comercial'},
-			{'code': '356', 'name': 'ABN Amro Real'},
-			{'code': '341', 'name': 'Itau'},
-			{'code': '347', 'name': 'Sudameris'},
-			{'code': '351', 'name': 'Banco Santander'},
-			{'code': '353', 'name': 'Banco Santander Brasil'},
-			{'code': '366', 'name': 'Banco Societe Generale Brasil'},
-			{'code': '370', 'name': 'Banco WestLB'},
-			{'code': '376', 'name': 'JP Morgan'},
-			{'code': '389', 'name': 'Banco Mercantil do Brasil'},
-			{'code': '394', 'name': 'Banco Mercantil de Crédito'},
-			{'code': '399', 'name': 'HSBC'},
-			{'code': '409', 'name': 'Unibanco'},
-			{'code': '412', 'name': 'Banco Capital'},
-			{'code': '422', 'name': 'Banco Safra'},
-			{'code': '453', 'name': 'Banco Rural'},
-			{'code': '456', 'name': 'Banco Tokyo Mitsubishi UFJ'},
-			{'code': '464', 'name': 'Banco Sumitomo Mitsui Brasileiro'},
-			{'code': '477', 'name': 'Citibank'},
-			{'code': '479', 'name': 'Itaubank (antigo Bank Boston)'},
-			{'code': '487', 'name': 'Deutsche Bank'},
-			{'code': '488', 'name': 'Banco Morgan Guaranty'},
-			{'code': '492', 'name': 'Banco NMB Postbank'},
-			{'code': '494', 'name': 'Banco la República Oriental del Uruguay'},
-			{'code': '495', 'name': 'Banco La Provincia de Buenos Aires'},
-			{'code': '505', 'name': 'Banco Credit Suisse'},
-			{'code': '600', 'name': 'Banco Luso Brasileiro'},
-			{'code': '604', 'name': 'Banco Industrial'},
-			{'code': '610', 'name': 'Banco VR'},
-			{'code': '611', 'name': 'Banco Paulista'},
-			{'code': '612', 'name': 'Banco Guanabara'},
-			{'code': '613', 'name': 'Banco Pecunia'},
-			{'code': '623', 'name': 'Banco Panamericano'},
-			{'code': '626', 'name': 'Banco Ficsa'},
-			{'code': '630', 'name': 'Banco Intercap'},
-			{'code': '633', 'name': 'Banco Rendimento'},
-			{'code': '634', 'name': 'Banco Triângulo'},
-			{'code': '637', 'name': 'Banco Sofisa'},
-			{'code': '638', 'name': 'Banco Prosper'},
-			{'code': '643', 'name': 'Banco Pine'},
-			{'code': '652', 'name': 'Itaú Holding Financeira'},
-			{'code': '653', 'name': 'Banco Indusval'},
-			{'code': '654', 'name': 'Banco A.J. Renner'},
-			{'code': '655', 'name': 'Banco Votorantim'},
-			{'code': '707', 'name': 'Banco Daycoval'},
-			{'code': '719', 'name': 'Banif'},
-			{'code': '721', 'name': 'Banco Credibel'},
-			{'code': '734', 'name': 'Banco Gerdau'},
-			{'code': '735', 'name': 'Banco Pottencial'},
-			{'code': '738', 'name': 'Banco Morada'},
-			{'code': '739', 'name': 'Banco Galvão de Negócios'},
-			{'code': '740', 'name': 'Banco Barclays'},
-			{'code': '741', 'name': 'BRP'},
-			{'code': '743', 'name': 'Banco Semear'},
-			{'code': '745', 'name': 'Banco Citibank'},
-			{'code': '746', 'name': 'Banco Modal'},
-			{'code': '747', 'name': 'Banco Rabobank International'},
-			{'code': '748', 'name': 'Banco Cooperativo Sicredi'},
-			{'code': '749', 'name': 'Banco Simples'},
-			{'code': '751', 'name': 'Dresdner Bank'},
-			{'code': '752', 'name': 'BNP Paribas'},
-			{'code': '753', 'name': 'Banco Comercial Uruguai'},
-			{'code': '755', 'name': 'Banco Merrill Lynch'},
-			{'code': '756', 'name': 'Banco Cooperativo do Brasil'},
-			{'code': '757', 'name': 'KEB'}
-			];
+	
 		
 		res.render("teste/banco", {lista: bancos});
 	});
@@ -1097,4 +1104,176 @@ module.exports = function (app){
 			res.status(500).json(resposta);	
 		});
 	});
+	
+	
+	app.get("/boleto", function(req,res){
+		res.render("teste/boleto");
+	});
+	
+	app.post("/boleto", function(req,res){
+		//https://docs.pagar.me/v2017-07-17/docs/realizando-uma-transacao-de-boleto-bancario
+		//https://pagarme.zendesk.com/hc/pt-br/articles/205967636-Posso-gerar-um-boleto-em-modo-teste-
+		//Data validade boleto - 7 dias
+		var dataBoleto = new Date(); //Data Atual
+		var dias = 7;
+		dataBoleto.setDate(dataBoleto.getDate() + dias); 
+		var tmp_data = dataBoleto.getFullYear() +  '/' + (dataBoleto.getMonth() + 1) + '/' +  pad(dataBoleto.getDate());
+		var data_vencimento = tmp_data + 'T23:59:59-03:00';
+		var valor = req.body.valor;
+		valor = valor + '00';
+		var dados_da_transacao = {
+			"amount": valor, 
+			"api_key": API_KEY, 
+			"installments": 1, //Parcelas
+			"payment_method":"boleto",
+			//Objeto obrigatorio
+			"customer": {
+				//Completar com os dados do cliente apenas para controle
+				//"address": {
+				//	"neighborhood": "Cidade Moncoes", 
+				//	"street": "Rua Dr.Geraldo Campos Moreira", 
+				//	"street_number": "240", 
+				//	"zipcode": "04571020"
+				//}, 
+				
+				//Os dois campos abaixo sao obrigatorios
+				"document_number": req.body.CPF, 
+				"name": req.body.nome 
+				
+				//"email": "jappleseed@apple.com", 
+				//"phone": {
+					//"ddd": "11", 
+					//"number": "15510101"
+				//}
+			},
+			"metadata": {
+				"id": "99",
+				"pedido": {
+					"product": {
+						"cost": valor, 
+						"name": "Bola Quadrada 2",
+						"code": "71"
+					}
+				},
+				"produto":"Bola Quadrada 2"
+			},
+			"boleto_instructions": "Instrucoes impressas no boleto",
+			"boleto_expiration_date" : data_vencimento,
+			"postback_url": "http://requestb.in/pkt7pgpk"
+			
+			//O valor a ser retido do total sera 5%
+			//(2,5% para CCP e 2,5% para operadora do cartao)
+			//Acrescenter o campo split_rules para cada fornecedor:
+			//Array de objetos
+			//"split_rules": [
+			//	{
+			//	  "recipient_id": "re_civb4p9l7004xbm6dhsetkpj8",
+			//	  "amount": 50,
+			//	  "liable": true, //indica se o recebedor atrelado assumirá os riscos de chargeback da transação
+			//	  "charge_processing_fee": true //Vai pagar as taxas
+			//	},{
+			//	  "recipient_id": "re_civb4o6zr003u3m6e8dezzja6",
+			//	  "amount": 50,
+			//	  "liable": true, //indica se o recebedor atrelado assumirá os riscos de chargeback da transação
+			//	  "charge_processing_fee": true //Vai pagar as taxas
+			//	}
+			//  ]
+		};
+		
+		
+		var opcoes = {  
+		  method: 'POST',
+		  uri: 'https://api.pagar.me/1/transactions',
+		  body: dados_da_transacao,
+		  json: true // JSON stringifies the body automatically
+		}
+		
+		rp(opcoes).then(function (response) {
+			console.log(response);
+			//Campos que devem ser utilizados do retorno
+			//"id": 1627800,
+			//"date_created": "2017-06-17T19:50:22.982Z",
+			//"authorized_amount": 1000,
+			//"paid_amount": 1000,
+			//"status": "processing",
+			//"payment_method": "boleto",
+			//"boleto_url":"https://pagar.me",
+			//"boleto_barcode":"1234 5678",
+			//"boleto_expiration_date":"2017-08-27T03:00:00.000Z"
+			
+			var resultados = response;
+			var status = resultados.status;
+			if (status =="processing"){
+				//Status padrao ao finalizar
+				
+				//Depois que o cliente finaliza a compra no site e gera o boleto, a transação tem o status processing até que o boleto seja de fato gerado ou registrado — até 11/09/2017, apenas documentos com valor maior do que 50 mil reais passam por registro.
+
+				//Após esse passo, o cliente recebe o boleto e a transação fica então com o status waiting_payment até que o pagamento seja efetuado.
+				
+				//Mostrar mensagem de sucesso
+			}
+			
+			
+			res.status(200).json({"resultado":"OK", "dados": resultados});
+		}).catch(function (err) {
+			console.log(err.statusCode);
+			console.log(err.message); 
+			console.log(err.error);
+			//console.log(err.response);
+			var codigo_erro = err.statusCode;
+			var detalhes_erro = err.message;
+			var resposta = {
+				"resultado":"erro",
+				"codigo": codigo_erro,
+				"detalhes":detalhes_erro
+			}
+			res.status(500).json(resposta);	
+		});
+		
+		
+	});
+	
+	app.get("/estornoboleto", function(req,res){
+		res.render("teste/estornoboleto", {lista: bancos});
+	});
+	
+	app.post("/estornoboleto", function(req,res){
+		
+		var id_transacao = req.body.id_transacao;
+		var valor = req.body.valor;
+		valor = valor + 00;
+		var dados_bancarios = {
+			"api_key": API_KEY,
+			//O estorno do boleto tambem pode ser parcial
+			"amount": valor,
+			"bank_account": {
+				"agencia": req.body.agencia,
+				"agencia_dv":  req.body.agencia_dv, 
+				"bank_code": req.body.bank_code,
+				"conta": req.body.conta,
+				"conta_dv": req.body.conta_dv,
+				"document_number": req.body.document_number, 
+				"legal_name": req.body.legal_name
+			}
+		};
+		var opcoes = {  
+		  method: 'POST',
+		  uri: 'https://api.pagar.me/1/transactions/' + id_transacao + '/refund',
+		  body: dados_bancarios,
+		  json: true // JSON stringifies the body automatically
+		}
+		rp(opcoes).then((data) => {
+			res.status(200).json({"resultado":"OK"});	
+		}).catch((err) => {
+			var codigo_erro = err.statusCode;
+			var detalhes_erro = err.message;
+			var resposta = {
+				"resultado":"erro",
+				"codigo": codigo_erro,
+				"detalhes":detalhes_erro
+			}
+			res.status(500).json(resposta);	
+		});
+	});
+	
 }

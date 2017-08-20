@@ -1,0 +1,239 @@
+<html>
+<head>
+	<title>Estorno de Boleto</title>
+	<link rel="stylesheet" href="css/bootstrap.css">
+</head>
+<body>
+	<div class="container">
+	<form id="formulario_banco" action="/estornoboleto" method="POST">
+		<div class="form-group">
+		<label>Agencia: <input type="text" id="agencia" name="agencia" maxlength="20"  onKeyPress="return isNumberKey(event)"  class="form-control"/></label>
+		</div>
+		<div class="form-group">
+		<label>Digito da Agencia: <input type="text" id="agencia_dv" name="agencia_dv" maxlength="1" onKeyPress="return isNumberKey(event)"  class="form-control"/></label>
+		</div>
+		<div class="form-group">
+		<label>Nome do titular: <input type="text" id="legal_name" name="legal_name" maxlength="50" onkeypress="somenteTexto(this);" onkeyup="somenteTexto(this);" onKeyPress="return isNumberKey(event)"  class="form-control"/></label>
+		</div>
+		<div class="form-group">
+		<label>Numero da Conta<input type="text" id="conta" name="conta" maxlength="14" onKeyPress="return isNumberKey(event)" class="form-control"/></label>
+		</div>
+		<div class="form-group">
+		<label>Digito da Conta: <input type="text" id="conta_dv" name="conta_dv" maxlength="1" onKeyPress="return isNumberKey(event)"  class="form-control"/></label>
+		</div>
+		<div class="form-group">
+		<label>Nome do Banco:
+		<select name="bank_code"  class="form-control">
+			<option value="0"></option>
+			<% for(var i=0; i < lista.length; i++) { %>
+				<option value="<%= lista[i].code %>"><%= lista[i].name %></option>
+			<% } %>
+		</select>
+		</label>
+		</div>
+		<div class="form-group">
+		<label>Documento (CPF ou CNPJ): <input type="text" id="document_number" name="document_number" maxlength="14" onKeyPress="return isNumberKey(event)"  class="form-control"/><br/>
+		</label>
+		</div>
+		<div class="form-group">
+		<label>Valor (inteiro): <input type="text" id="valor" name="valor" maxlength="20"  onKeyPress="return isNumberKey(event)"  class="form-control"/></label>
+		</div>
+		<div class="form-group">
+		<label>ID Transação: <input type="text" id="id_transacao" name="id_transacao" maxlength="20"  onKeyPress="return isNumberKey(event)"  class="form-control"/></label>
+		</div>
+		<div class="form-group">
+		<input type="submit" class="btn btn-primary" value="Gravar"></input>
+		</div>
+	</form>
+	</div>
+</body>
+<script type="text/javascript">
+	function echeck(str) {
+
+		var at="@"
+		var dot="."
+		var lat=str.indexOf(at)
+		var lstr=str.length
+		var ldot=str.indexOf(dot)
+		if (str.indexOf(at)==-1){
+		   //alert("Invalid E-mail ID")
+		   return false
+		}
+
+		if (str.indexOf(at)==-1 || str.indexOf(at)==0 || str.indexOf(at)==lstr){
+		   //alert("Invalid E-mail ID")
+		   return false
+		}
+
+		if (str.indexOf(dot)==-1 || str.indexOf(dot)==0 || str.indexOf(dot)==lstr){
+			//alert("Invalid E-mail ID")
+			return false
+		}
+
+		 if (str.indexOf(at,(lat+1))!=-1){
+			//alert("Invalid E-mail ID")
+			return false
+		 }
+
+		 if (str.substring(lat-1,lat)==dot || str.substring(lat+1,lat+2)==dot){
+			//alert("Invalid E-mail ID")
+			return false
+		 }
+
+		 if (str.indexOf(dot,(lat+2))==-1){
+			//alert("Invalid E-mail ID")
+			return false
+		 }
+		
+		 if (str.indexOf(" ")!=-1){
+			//alert("Invalid E-mail ID")
+			return false
+		 }
+
+		 return true					
+	}
+			
+	
+	function checaCPF (CPF) {
+		if (CPF.length != 11 || CPF == "00000000000" || CPF == "11111111111" ||
+			CPF == "22222222222" ||	CPF == "33333333333" || CPF == "44444444444" ||
+			CPF == "55555555555" || CPF == "66666666666" || CPF == "77777777777" ||
+			CPF == "88888888888" || CPF == "99999999999" || CPF == "01234567890")
+			return false;
+		soma = 0;
+		for (i=0; i < 9; i ++)
+			soma += parseInt(CPF.charAt(i)) * (10 - i);
+		resto = 11 - (soma % 11);
+		if (resto == 10 || resto == 11)
+			resto = 0;
+		if (resto != parseInt(CPF.charAt(9)))
+			return false;
+		soma = 0;
+		for (i = 0; i < 10; i ++)
+			soma += parseInt(CPF.charAt(i)) * (11 - i);
+		resto = 11 - (soma % 11);
+		if (resto == 10 || resto == 11)
+			resto = 0;
+		if (resto != parseInt(CPF.charAt(10)))
+			return false;
+		   
+		return true;
+	 }
+
+	function isNumberKey(evt)
+		{
+		 var charCode = (evt.which) ? evt.which : event.keyCode
+		 if (charCode > 31 && (charCode < 48 || charCode > 57))
+			return false;
+
+		 return true;
+	}
+	
+	function somenteTexto(campo) {
+	  campo.value = campo.value.replace(/[^a-zA-Zà-üÀ-Ü\s@]/g, '');
+	  campo.value = campo.value.replace('@', '');
+	}
+	
+	function checkform_banco (e) {
+		var form = e.target;
+		var continuar = true;
+		var mensagem = "Ocorreram os seguintes erros:\n";
+		form.agencia.style.backgroundColor='#FFFFFF';
+		form.agencia_dv.style.backgroundColor='#FFFFFF';
+		form.legal_name.style.backgroundColor='#FFFFFF';
+		form.conta.style.backgroundColor='#FFFFFF';
+		form.conta_dv.style.backgroundColor='#FFFFFF';
+		form.document_number.style.backgroundColor='#FFFFFF';
+		form.valor.style.backgroundColor='#FFFFFF';
+		form.id_transacao.backgroundColor='#FFFFFF';
+
+		if (form.agencia.value == "") {
+			mensagem = mensagem + 'Por favor informe o nome da Agência\n';
+			form.agencia.style.backgroundColor='#FFFF99';
+			continuar = false;
+		} 
+		
+		if (form.agencia_dv.value == "") {
+			mensagem = mensagem + 'Por favor informe o digito da Agência\n';
+			form.agencia_dv.style.backgroundColor='#FFFF99';
+			continuar = false;
+		} 
+		
+		if (form.legal_name.value == "") {
+			mensagem = mensagem + 'Por favor informe o nome do titular\n';
+			form.legal_name.style.backgroundColor='#FFFF99';
+			continuar = false;
+		} 
+		
+		if (form.conta.value == "") {
+			mensagem = mensagem + 'Por favor informe o numero da conta\n';
+			form.conta.style.backgroundColor='#FFFF99';
+			continuar = false;
+		} 
+		
+		if (form.conta_dv.value == "") {
+			mensagem = mensagem + 'Por favor informe o digito da conta\n';
+			form.conta_dv.style.backgroundColor='#FFFF99';
+			continuar = false;
+		} 
+		
+		if (form.bank_code.options[form.bank_code.selectedIndex].value == "0") {
+			mensagem = mensagem + 'Você precisa selecionar o banco\n';	
+			continuar = false;	
+		}
+		
+		if (form.document_number.value == "") {
+			mensagem = mensagem + 'Por favor informe o CPF ou CNPJ do titular\n';
+			form.document_number.style.backgroundColor='#FFFF99';
+			continuar = false;
+		} else {
+			if (form.document_number.value.length < 14) {
+				//Talvez tenha sido informado um CPF
+				if (checaCPF (form.document_number.value)==false){
+					mensagem = mensagem +  'O CPF foi preenchido de forma incorreta\n';
+					form.document_number.style.backgroundColor='#FFFF99';
+					continuar = false;
+				} 	
+			 } else {
+				if (is_cnpj(form.document_number.value)) {
+					  //CNPJ válido
+				  } else {
+					mensagem = mensagem + 'O CNPJ informado está incorreto\n';
+					form.document_number.style.backgroundColor='#FFFF99';
+					continuar = false;	  
+				  }
+			 }
+		}
+		
+		if (form.valor.value == "") {
+			mensagem = mensagem + 'Por favor informe o valor\n';
+			form.valor.style.backgroundColor='#FFFF99';
+			continuar = false;
+		} 
+		
+		if (form.id_transacao.value == "") {
+			mensagem = mensagem + 'Por favor informe o ID Pagar.me da transação\n';
+			form.id_transacao.style.backgroundColor='#FFFF99';
+			continuar = false;
+		} 
+		
+		if (continuar) {
+			return true;
+		} else {
+			alert(mensagem);
+			e.preventDefault();
+			return false;
+		}
+
+
+	}
+	
+	try {
+	  document.getElementById("formulario_banco").addEventListener("submit", checkform_banco, false);
+	} catch (error) {
+	  //Nada a fazer
+	}
+
+</script>
+
+</html>
